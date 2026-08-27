@@ -36,7 +36,9 @@ RPsoft/
 └── others/               # 其他文件（依赖、打包脚本、图标）
     ├── requirements.txt  # Python 依赖
     ├── RPsoft.spec       # PyInstaller 打包配置（onedir）
-    └── build.bat         # 一键打包脚本
+    ├── installer.iss     # Inno Setup 安装器脚本
+    ├── build.bat         # 打包 exe 脚本
+    └── build_release.bat # 一条龙：打包 exe + 生成安装器
 ```
 
 ## 快速开始
@@ -115,8 +117,21 @@ pyinstaller --clean --noconfirm --distpath . --workpath others\build others\RPso
 
 - 采用 **onedir** 模式：`RPsoft.exe` 与 `_internal\` 必须**保持在一起**（`_internal\` 内含 Python 运行时与依赖，删除后无法启动）。
 - 相比 onefile 单文件，onedir 启动更快（无需每次解包到临时目录）；代价是根目录多一个 `_internal\` 文件夹。
-- 用户数据（角色卡、聊天记录、`config.json`）保存在 `data\`，随 `RPsoft.exe` 一起备份即可。
+- 便携版用户数据（角色卡、聊天记录、`config.json`）保存在 `RPsoft.exe` 旁的 `data\`，随 exe 一起备份即可；**安装版**数据保存在 `%APPDATA%\RPsoft`，卸载不丢。
 - `RPsoft.exe` 与 `_internal\` 均已被 `.gitignore` 忽略，不会进入版本库。
+
+## 打包成安装器（面向小白分发）
+
+需要 [Inno Setup](https://jrsoftware.org/isinfo.php)。一条龙脚本 `others\build_release.bat` 会自动「打包 exe → 生成安装器」，产物为 `dist\RPS-setup-0.0.0-win-amd64.exe`。
+
+安装器特性：
+
+- 兼容 **Win10 / Win11 x64**，默认安装到 `Program Files\RPsoft`
+- 安装时可**自选安装路径**，开头显示 **GPL-3.0 协议**，需同意才能继续
+- 自动创建**开始菜单**（RPsoft、卸载 RPsoft）与**桌面**快捷方式
+- 控制面板「卸载程序」可正常卸载；用户数据在 `%APPDATA%\RPsoft`，**卸载不删除**
+
+> 若本机没有 Inno Setup：下载官方安装器后执行 `is.exe /VERYSILENT /PORTABLE=1 /DIR=others\inno` 便携解压（该目录已 git 忽略），`build_release.bat` 会自动调用其中的 `ISCC.exe`。
 
 ## 许可证
 

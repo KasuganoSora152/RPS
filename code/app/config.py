@@ -1,12 +1,14 @@
-"""应用配置：加载 / 保存本地 data/config.json。
+"""应用配置：加载 / 保存本地 config.json。
 
-支持两种运行方式：
-- 源码运行：数据目录在项目根目录下的 data/；
-- PyInstaller 打包运行：数据目录在可执行文件旁的 data/（可写、持久）。
+数据目录：
+- 源码运行：项目根目录下的 data/；
+- PyInstaller 打包运行：%APPDATA%\\RPsoft（Program Files 下也可写、卸载不丢数据）。
 """
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -19,16 +21,38 @@ def is_frozen() -> bool:
     return bool(getattr(sys, "frozen", False))
 
 
-if is_frozen():
-    # 打包运行：数据目录放在可执行文件旁边（不能放在临时解包目录里，否则退出会被清空）
-    BASE_DIR = Path(sys.executable).resolve().parent
-else:
-    BASE_DIR = _PROJECT_ROOT
+def _resolve_data_dir() -> Path:
+    """确定数据目录。
 
-DATA_DIR = BASE_DIR / "data"
+    - 源码运行：项目根目录 data/；
+    - 打包运行：%APPDATA%\\RPsoft（用户目录，可写；避免 Program Files 只读、
+      卸载误删数据）。
+    """
+    if not is_frozen():
+        return _PROJECT_ROOT / "data"
+    appdata = os.environ.get("APPDATA")
+    if appdata:
+        return Path(appdata) / "RPsoft"
+    # 兜底：极少数环境没有 APPDATA 时，退回 exe 目录
+    return Path(sys.executable).resolve().parent / "data"
+
+
+DATA_DIR = _resolve_data_dir()
 CHARACTERS_DIR = DATA_DIR / "characters"
 CHATS_DIR = DATA_DIR / "chats"
 CONFIG_PATH = DATA_DIR / "config.json"
+
+
+def _migrate_legacy_data() -> None:
+    """把旧版「exe 旁 data/」迁移到新的 %APPDATA%\\RPsoft（仅打包运行时、一次）。"""
+    if not is_frozen():
+        return
+    legacy = Path(sys.executable).resolve().parent / "data"
+    if legacy.exists() and not DATA_DIR.exists():
+        try:
+            shutil.copytree(legacy, DATA_DIR)
+        except Exception:  # noqa: BLE001 迁移失败不阻塞启动
+            pass
 
 DEFAULT_SYSTEM_PROMPT = (
     "你将扮演一个角色，与用户进行沉浸式角色扮演对话。\n"
@@ -58,7 +82,8 @@ DEFAULTS: dict[str, Any] = {
 
 
 def ensure_dirs() -> None:
-    """确保数据目录存在。"""
+    """确保数据目录存在（打包运行时先尝试迁移旧版数据）。"""
+    _migrate_legacy_data()
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     CHARACTERS_DIR.mkdir(parents=True, exist_ok=True)
     CHATS_DIR.mkdir(parents=True, exist_ok=True)

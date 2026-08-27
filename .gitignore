@@ -1,4 +1,4 @@
-﻿# 隐私数据（含 API Key）
+# 隐私数据（含 API Key）
 data/config.json
 data/chats/
 data/meta.json
@@ -12,6 +12,9 @@ RPsoft.exe
 _internal/
 others/build/
 others/.venv/
+others/inno/
+others/inno-download/
+dist/
 
 # Python 缓存
 __pycache__/
