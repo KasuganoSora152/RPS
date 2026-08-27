@@ -100,46 +100,12 @@ python code\run.py
 | Max Tokens | `2048` |
 | 主题 | 浅色（可在设置中切换深色） |
 
-## 打包成 Windows 启动器（exe）
+## 后续规划
 
-本机装好 Python 3.10+ 即可。双击 `others\build.bat`，或在项目根目录执行：
-
-```powershell
-py -m venv others\.venv
-others\.venv\Scripts\Activate.ps1
-pip install -r others\requirements.txt pyinstaller
-pyinstaller --clean --noconfirm --distpath . --workpath others\build others\RPsoft.spec
-```
-
-产物为项目根目录下的 **`RPsoft.exe`** + **`_internal\`** 文件夹（**onedir** 模式、无控制台窗口）。双击 `RPsoft.exe` 即打开软件窗口，无需安装 Python、无需配置环境。
-
-说明：
-
-- 采用 **onedir** 模式：`RPsoft.exe` 与 `_internal\` 必须**保持在一起**（`_internal\` 内含 Python 运行时与依赖，删除后无法启动）。
-- 相比 onefile 单文件，onedir 启动更快（无需每次解包到临时目录）；代价是根目录多一个 `_internal\` 文件夹。
-- 便携版用户数据（角色卡、聊天记录、`config.json`）保存在 `RPsoft.exe` 旁的 `data\`，随 exe 一起备份即可；**安装版**数据保存在 `%APPDATA%\RPsoft`，卸载不丢。
-- `RPsoft.exe` 与 `_internal\` 均已被 `.gitignore` 忽略，不会进入版本库。
-
-## 打包成安装器（面向小白分发）
-
-需要 [Inno Setup](https://jrsoftware.org/isinfo.php)。一条龙脚本 `others\build_release.bat` 会自动「打包 exe → 生成安装器」，产物为 `dist\RPS-setup-0.0.0-win-amd64.exe`。
-
-安装器特性：
-
-- 兼容 **Win10 / Win11 x64**，默认安装到 `Program Files\RPsoft`
-- 安装时可**自选安装路径**，开头显示 **GPL-3.0 协议**，需同意才能继续
-- 自动创建**开始菜单**（RPsoft、卸载 RPsoft）与**桌面**快捷方式
-- 控制面板「卸载程序」可正常卸载；用户数据在 `%APPDATA%\RPsoft`，**卸载不删除**
-
-> 若本机没有 Inno Setup：下载官方安装器后执行 `is.exe /VERYSILENT /PORTABLE=1 /DIR=others\inno` 便携解压（该目录已 git 忽略），`build_release.bat` 会自动调用其中的 `ISCC.exe`。
+- [ ] 多操作系统适配
+- [ ] 移动端分发
+- [ ] 同步追番
 
 ## 许可证
 
 本项目采用 [GNU General Public License v3.0（GPL-3.0）](LICENSE)。简而言之：你可以自由使用、修改、分发本项目，但衍生作品也必须以 GPL-3.0 开源。完整条款见仓库根目录的 [`LICENSE`](LICENSE) 文件。
-
-## 后续规划
-
-- [ ] 多轮上下文上限 / 摘要压缩
-- [ ] 会话导出 / 导入
-- [ ] 更多模型参数（thinking、top_k 等）暴露到设置
-- [x] PyInstaller 封装为免安装 exe（已完成：onedir 模式）
