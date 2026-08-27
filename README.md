@@ -1,7 +1,9 @@
-<h1 align="center">
-  <img src="others/RPS_icon-256.png" alt="RPsoft" width="44" align="middle"/>
-  RPsoft
-</h1>
+<table align="center">
+  <tr>
+    <td><img src="others/RPS_icon-256.png" alt="RPsoft" width="88"></td>
+    <td><h1>RPsoft</h1></td>
+  </tr>
+</table>
 
 一个**完全本地**的角色扮演 / AI 对话桌面应用：接入 DeepSeek API，支持自定义角色卡，轻量化、纯 JSON 存储——无数据库、无前端构建步骤，双击 exe 即用。
 
