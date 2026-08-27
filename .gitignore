@@ -1,0 +1,18 @@
+﻿# 隐私数据（含 API Key）
+data/config.json
+data/chats/
+data/meta.json
+
+# 用户自建角色卡（仅保留预设示例）
+data/characters/*
+!data/characters/whale-girl.json
+
+# 构建产物
+RPsoft.exe
+_internal/
+others/build/
+others/.venv/
+
+# Python 缓存
+__pycache__/
+*.py[cod]

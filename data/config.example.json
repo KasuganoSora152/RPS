@@ -1,0 +1,12 @@
+{
+  "api_key": "",
+  "base_url": "https://api.deepseek.com/v1",
+  "model": "deepseek-v4-flash",
+  "temperature": 1.0,
+  "max_tokens": 2048,
+  "top_p": 1.0,
+  "port": 8000,
+  "open_browser": true,
+  "system_prompt": "你将扮演一个角色，与用户进行沉浸式角色扮演对话。\n请完全代入下面的角色设定，始终以该角色的身份、口吻与语气回应，不要跳出角色，也不要替用户发言。\n回答要自然、具体、符合人设，避免长篇说教。\n\n【角色设定】\n名称：{name}\n描述：{description}\n性格：{personality}\n世界观 / 背景：{scenario}\n对话示例：\n{dialogue_examples}\n额外设定：{system_prompt}\n",
+  "theme": "light"
+}

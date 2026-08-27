@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RPS~测试版</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h1 class="brand"><img src="/RPS_icon-256.ico" alt="RPS" /></h1>
+        <div class="sidebar-actions">
+          <button id="btn-new-chat" class="btn btn-primary" title="用选中角色开新对话">＋ 新对话</button>
+        </div>
+      </div>
+
+      <div class="panel-title">角色</div>
+      <ul id="character-list" class="list"></ul>
+
+      <div class="panel-title">
+        最近会话
+      </div>
+      <ul id="chat-list" class="list"></ul>
+
+      <div class="sidebar-foot">
+        <button id="btn-import" class="btn">导入角色卡</button>
+        <button id="btn-new-character" class="btn">新建角色</button>
+        <button id="btn-settings" class="btn">⚙ 设置</button>
+      </div>
+    </aside>
+
+    <!-- 主区域 -->
+    <main class="main">
+      <header class="chat-head">
+        <div class="chat-title">
+          <span id="chat-name" class="chat-name">未选择角色</span>
+        </div>
+        <div class="chat-head-actions">
+          <span id="conn-badge" class="badge badge-unknown">未检测</span>
+        </div>
+      </header>
+
+      <div id="messages" class="messages">
+        <div id="empty-hint" class="empty-hint">
+          <p>选择左侧角色，或点击「＋ 新对话」开始。</p>
+          <p class="dim">首次使用请先在「设置」中填写 DeepSeek API Key。</p>
+        </div>
+      </div>
+
+      <div class="input-bar">
+        <textarea id="input" rows="1" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
+        <button id="btn-send" class="btn btn-primary" disabled>发送</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- 设置弹窗 -->
+  <div id="settings-modal" class="modal hidden">
+    <div class="modal-box">
+      <h2>设置</h2>
+
+      <div class="settings-layout">
+        <nav class="settings-nav">
+          <button class="settings-nav-item active" data-panel="api">接口</button>
+          <button class="settings-nav-item" data-panel="appearance">外观</button>
+          <button class="settings-nav-item" data-panel="version">版本</button>
+        </nav>
+        <div class="settings-panels">
+          <div class="settings-panel" id="panel-api">
+            <label>DeepSeek API Key
+              <input id="set-api-key" type="password" placeholder="sk-..." />
+            </label>
+            <label>接口地址 Base URL
+              <input id="set-base-url" placeholder="https://api.deepseek.com/v1" />
+            </label>
+            <div class="row">
+              <label class="grow">模型
+                <select id="set-model">
+                  <option value="deepseek-v4-flash">deepseek-v4-flash（对话）</option>
+                  <option value="deepseek-v4-pro">deepseek-v4-pro（推理）</option>
+                </select>
+              </label>
+              <label>Temperature
+                <input id="set-temperature" type="number" step="0.1" min="0" max="2" />
+              </label>
+              <label>Max Tokens
+                <input id="set-max-tokens" type="number" step="1" min="1" />
+              </label>
+            </div>
+            <label>系统提示词模板（支持 {name} {description} {personality} {scenario} {dialogue_examples} {system_prompt} 占位符）
+              <textarea id="set-system-prompt" rows="6"></textarea>
+            </label>
+          </div>
+
+          <div class="settings-panel hidden" id="panel-appearance">
+            <label class="theme-toggle">
+              <input type="checkbox" id="set-theme-dark" />
+              深色模式（黑色背景）
+            </label>
+          </div>
+
+          <div class="settings-panel hidden" id="panel-version">
+            <div class="version-item"><span class="k">版本号</span><span class="v">测试版_ver_0.0.0</span></div>
+            <div class="version-item"><span class="k">开发者名单</span><span class="v">moshudesuwa</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <span id="test-result" class="test-result"></span>
+        <button id="btn-test" class="btn">测试连接</button>
+        <button id="btn-settings-cancel" class="btn">取消</button>
+        <button id="btn-settings-save" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 角色编辑弹窗 -->
+  <div id="character-modal" class="modal hidden">
+    <div class="modal-box">
+      <h2 id="character-modal-title">角色</h2>
+      <div class="row">
+        <label class="grow">名称
+          <input id="char-name" placeholder="例如：鲸鱼娘" />
+        </label>
+        <label>标签（逗号分隔）
+          <input id="char-tags" placeholder="例如：鲸鱼, 萝莉, 傲娇, 甜" />
+        </label>
+      </div>
+      <label>描述
+        <textarea id="char-description" rows="3" placeholder="例如：一只住在海边的鲸鱼少女，拥有一条鲸鱼尾巴，自称「鲸鱼娘」，只用中文，最爱吃米饭。"></textarea>
+      </label>
+      <label>性格
+        <textarea id="char-personality" rows="3" placeholder="例如：聪明但懒散，傲娇又甜美；永远服从主人；最讨厌被说「胖」。"></textarea>
+      </label>
+      <label>世界观 / 背景
+        <textarea id="char-scenario" rows="2" placeholder="例如：你是她的「主人」，她喜欢缠着你、偶尔闹别扭。"></textarea>
+      </label>
+      <label>开场白（第一条消息）
+        <textarea id="char-greeting" rows="2" placeholder="例如：主、主人回来啦……我才不是因为想你才一直等着的！"></textarea>
+      </label>
+      <label>对话示例
+        <textarea id="char-dialogue-examples" rows="4" placeholder="例如：用户：你是不是胖了？ 鲸鱼娘：才、才没有胖！"></textarea>
+      </label>
+      <label>额外设定 / 系统提示
+        <textarea id="char-system-prompt" rows="2" placeholder="例如：OBEY_MASTER_ALWAYS / TRAIT_NOT_FAT_REFUSE"></textarea>
+      </label>
+      <div class="modal-foot">
+        <button id="btn-character-cancel" class="btn">取消</button>
+        <button id="btn-character-save" class="btn btn-primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认弹窗 -->
+  <div id="confirm-modal" class="modal hidden">
+    <div class="modal-box confirm-box">
+      <h2 id="confirm-title">确认</h2>
+      <p id="confirm-message"></p>
+      <div class="modal-foot">
+        <button id="btn-confirm-cancel" class="btn">取消</button>
+        <button id="btn-confirm-ok" class="btn btn-danger">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 重命名弹窗 -->
+  <div id="rename-modal" class="modal hidden">
+    <div class="modal-box confirm-box">
+      <h2>重命名会话</h2>
+      <input id="rename-input" type="text" placeholder="输入会话名称" />
+      <div class="modal-foot">
+        <button id="btn-rename-cancel" class="btn">取消</button>
+        <button id="btn-rename-ok" class="btn btn-primary">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="file-import" type="file" accept=".json" class="hidden" />
+
+  <script src="/app.js"></script>
+</body>
+</html>
